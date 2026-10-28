@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: battlehubarena
+    runtime: node
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: 18
+      - key: DATA_FILE
+        value: /var/data/battlehub-data.json
+      - key: RAZORPAY_KEY_ID
+        sync: false
+      - key: RAZORPAY_KEY_SECRET
+        sync: false
+      - key: ADMIN_TOKEN
+        generateValue: true
+    disk:
+      name: battlehub-data
+      mountPath: /var/data
+      sizeGB: 1

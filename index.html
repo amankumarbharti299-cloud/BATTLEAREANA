@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#090b12"><title>BattleHub — Tournament Arena</title>
+  <link rel="manifest" href="manifest.json"><link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="app-shell">
+  <aside class="desktop-admin"><div class="desktop-logo"><div class="brand-mark">B</div><b>BATTLEHUB</b></div><button class="desktop-nav active" data-view="homeView">⌂ <span>Player View</span></button><button class="desktop-nav" data-view="adminView">▦ <span>Admin Dashboard</span></button><div class="admin-owner"><small>CONTROL ACCOUNT</small><b>Admin • Laptop</b><span>● Local session</span></div></aside>
+  <header class="topbar"><button id="installApp" class="install-app" hidden>Download App</button><div class="brand"><div class="brand-mark">B</div><div><b>BATTLEHUB</b><small>PLAY • WIN • REPEAT</small></div></div><button class="wallet" onclick="openModal('walletModal')"><span>₹</span><strong id="walletBalance">500</strong><small>+</small></button></header>
+  <main>
+    <section id="homeView" class="view active">
+      <div class="hero"><div><span class="live-dot">LIVE ARENA</span><h1>India's Battle<br>Arena</h1><p>Join daily Free Fire tournaments and climb the leaderboard.</p></div><div class="hero-badge"><strong>18+</strong><span>AGE<br>LIMIT</span></div></div>
+      <div class="game-tabs"><button class="active" data-game="All">All</button><button data-game="Free Fire"><span>FF</span> Free Fire</button><button data-game="Free Fire India"><span>FF</span> Free Fire India</button></div>
+      <div class="section-title"><h2>Upcoming matches</h2><button onclick="renderTournaments()">Refresh</button></div>
+      <div id="tournamentList" class="match-grid"></div>
+    </section>
+    <section id="matchesView" class="view"><div class="page-head"><h1>My Matches</h1><p>Your joined tournaments and room details.</p></div><div id="joinedList" class="match-grid"></div></section>
+    <section id="leaderboardView" class="view"><div class="page-head"><h1>Leaderboard</h1><p>Top arena champions this season.</p></div><div class="leaderboard-card"><div id="leaderboardList"></div></div></section>
+    <section id="profileView" class="view"><div class="page-head"><h1>Profile</h1><p>Player statistics and account controls.</p></div><div class="profile-card"><div class="avatar">RK</div><div><h3>Rohan Kumar</h3><span>Player ID: BH9021</span></div></div><div class="stats"><div><strong id="matchesPlayed">0</strong><span>Matches</span></div><div><strong>0</strong><span>Wins</span></div><div><strong>—</strong><span>Rank</span></div></div><button class="outline-btn" onclick="toggleAdmin()">Open Admin Panel</button></section>
+    <section id="adminView" class="view"><div class="page-head"><h1>Admin Control Center</h1><p>Manage tournaments and monitor the desktop platform.</p></div><div class="admin-overview"><div><span>Active tournaments</span><strong id="activeTournamentCount">0</strong></div><div><span>Joined players</span><strong id="adminPlayerCount">0</strong></div><div><span>Entry collection</span><strong id="adminCollection">₹0</strong></div><div><span>Players online</span><strong id="playersOnline">0</strong></div><div><span>Players offline</span><strong id="playersOffline">0</strong></div></div><form id="adminForm" class="admin-form"><label>Match title<input name="title" required placeholder="Free Fire Night Clash"></label><div class="form-row"><label>Game<select name="game"><option>Free Fire</option><option>Free Fire India</option></select></label><label>Mode<select name="mode"><option>Solo</option><option>Duo</option><option>Squad</option></select></label></div><div class="form-row"><label>Entry fee (₹)<input name="entry" type="number" min="5" value="5" required></label><label>Prize pool (₹)<input name="prize" type="number" min="0" value="500" required></label></div><div class="form-row"><label>Slots<input name="slots" type="number" min="2" value="100" required></label><label>Date & time<input name="time" type="datetime-local" required></label></div><button class="primary-btn">Create Tournament</button></form><h2 class="admin-sub">Managed tournaments</h2><div id="adminMatches"></div></section>
+  </main>
+  <nav><button class="active" data-view="homeView"><span>⌂</span>Home</button><button data-view="matchesView"><span>▣</span>Matches</button><button data-view="leaderboardView"><span>♛</span>Rankings</button><button data-view="profileView"><span>♙</span>Profile</button></nav>
+</div>
+<div id="joinModal" class="modal"><div class="modal-card"><button class="close" onclick="closeModals()">×</button><div id="joinContent"></div></div></div>
+<div id="walletModal" class="modal"><div class="modal-card"><button class="close" onclick="closeModals()">×</button><h2>Add balance</h2><p class="muted">Add money using verified Razorpay payment methods. Wallet credit is applied only after server-side payment signature verification.</p><label class="payment-label">Amount (₹)<input id="depositAmount" type="number" min="5" value="100"></label><div class="quick-add"><button onclick="setDeposit(100)">₹100</button><button onclick="setDeposit(500)">₹500</button><button onclick="setDeposit(1000)">₹1000</button></div><label class="payment-label">Pay using</label><div class="payment-options"><button onclick="requestPayment('UPI')">UPI</button><button onclick="requestPayment('PhonePe')">PhonePe</button><button onclick="requestPayment('Paytm')">Paytm</button></div></div></div>
+<div id="toast" class="toast"></div>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script><script src="app.js"></script>
+</body></html>
