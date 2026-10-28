@@ -14,8 +14,10 @@ function loadData(){try{return {...defaultData, ...JSON.parse(fs.readFileSync(da
 function saveData(data){fs.writeFileSync(dataFile, JSON.stringify(data, null, 2))}
 let data = loadData();
 
-const razorpay = process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET
-  ? new Razorpay({key_id: process.env.RAZORPAY_KEY_ID, key_secret: process.env.RAZORPAY_KEY_SECRET}) : null;
+const razorpayKeyId = process.env.RAZORPAY_KEY_ID || '';
+const validRazorpayKeyId = /^rzp_(test|live)_/.test(razorpayKeyId);
+const razorpay = validRazorpayKeyId && process.env.RAZORPAY_KEY_SECRET
+  ? new Razorpay({key_id: razorpayKeyId, key_secret: process.env.RAZORPAY_KEY_SECRET}) : null;
 
 app.use((req,res,next)=>{res.setHeader('Cache-Control','no-store');next()});
 app.get('/api/health',(_req,res)=>res.json({ok:true,service:'BattleHub Arena'}));
@@ -58,6 +60,6 @@ app.post('/api/tournaments/join',(req,res)=>{
   if(!player||!tournament)return res.status(400).json({error:'Invalid player or tournament'});if(player.joined.includes(tournament.id))return res.status(409).json({error:'Already joined'});if(tournament.filled>=tournament.slots)return res.status(409).json({error:'Tournament full'});if(player.balance<tournament.entry)return res.status(402).json({error:'Insufficient balance'});
   player.balance-=tournament.entry;player.joined.push(tournament.id);tournament.filled++;saveData(data);res.json({joined:true,balance:player.balance});
 });
-app.get('/api/config',(_req,res)=>res.json({keyId:process.env.RAZORPAY_KEY_ID||null,paymentsReady:Boolean(razorpay)}));
+app.get('/api/config',(_req,res)=>res.json({keyId:validRazorpayKeyId ? razorpayKeyId : null,paymentsReady:Boolean(razorpay)}));
 app.use(express.static(__dirname,{extensions:['html']}));
 const port=Number(process.env.PORT||8080);app.listen(port,'0.0.0.0',()=>console.log(`BattleHub Arena listening on ${port}`));
