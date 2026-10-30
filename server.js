@@ -24,9 +24,11 @@ app.get('/api/health',(_req,res)=>res.json({ok:true,service:'BattleHub Arena'}))
 app.post('/api/player', (req,res)=>{
   const id = String(req.body.id || '').replace(/[^a-zA-Z0-9_-]/g,'').slice(0,40);
   const name = String(req.body.name || 'Player').trim().slice(0,40);
+  const freeFireId = String(req.body.freeFireId || '').replace(/[^a-zA-Z0-9_-]/g,'').slice(0,40);
   if(!id) return res.status(400).json({error:'Player id required'});
-  data.players[id] ||= {id,name,balance:0,joined:[],createdAt:new Date().toISOString()};
+  data.players[id] ||= {id,name,freeFireId,balance:0,joined:[],createdAt:new Date().toISOString()};
   data.players[id].name = name || data.players[id].name;
+  if(freeFireId) data.players[id].freeFireId = freeFireId;
   data.presence[id] = Date.now(); saveData(data); res.json(data.players[id]);
 });
 app.post('/api/presence',(req,res)=>{const id=String(req.body.id||'').slice(0,40);if(id)data.presence[id]=Date.now();saveData(data);res.json({ok:true})});
@@ -59,6 +61,15 @@ app.post('/api/tournaments/join',(req,res)=>{
   const player=data.players[String(req.body.playerId||'').slice(0,40)];const tournament=data.tournaments.find(t=>t.id===String(req.body.tournamentId));
   if(!player||!tournament)return res.status(400).json({error:'Invalid player or tournament'});if(player.joined.includes(tournament.id))return res.status(409).json({error:'Already joined'});if(tournament.filled>=tournament.slots)return res.status(409).json({error:'Tournament full'});if(player.balance<tournament.entry)return res.status(402).json({error:'Insufficient balance'});
   player.balance-=tournament.entry;player.joined.push(tournament.id);tournament.filled++;saveData(data);res.json({joined:true,balance:player.balance});
+});
+app.get('/api/admin/players.csv',(req,res)=>{
+  if(!process.env.ADMIN_TOKEN || req.header('x-admin-token')!==process.env.ADMIN_TOKEN)return res.status(401).json({error:'Unauthorized'});
+  const safe=(value='')=>{let text=String(value).replace(/"/g,'""');if(/^[-+@=]/.test(text))text="'"+text;return `"${text}"`};
+  const rows=[['Player Name','BattleHub ID','Free Fire ID','Wallet Balance','Joined Tournament IDs','Registered At']];
+  Object.values(data.players).forEach(player=>rows.push([player.name||'',player.id||'',player.freeFireId||'',player.balance||0,(player.joined||[]).join(';'),player.createdAt||'']));
+  res.setHeader('Content-Type','text/csv; charset=utf-8');
+  res.setHeader('Content-Disposition','attachment; filename="battlehub-players.csv"');
+  res.send('\uFEFF'+rows.map(row=>row.map(safe).join(',')).join('\r\n'));
 });
 app.get('/api/config',(_req,res)=>res.json({keyId:validRazorpayKeyId ? razorpayKeyId : null,paymentsReady:Boolean(razorpay)}));
 app.use(express.static(__dirname,{extensions:['html']}));
